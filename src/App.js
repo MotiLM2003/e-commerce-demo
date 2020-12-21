@@ -1,25 +1,69 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
-function App() {
+import { commerce } from './lib/commerce';
+import { Navbar, Products, Cart, Checkout } from './components';
+
+const App = () => {
+  const [products, setProducts] = useState([]);
+  const [cart, setCart] = useState({});
+  const fetchProducts = async () => {
+    const { data } = await commerce.products.list();
+    setProducts(data);
+  };
+
+  const fetchCart = async () => {
+    const cart = await commerce.cart.retrieve();
+    setCart(cart);
+  };
+
+  const handleAddToCart = async (id, quantity) => {
+    const { cart } = await commerce.cart.add(id, quantity);
+    setCart(cart);
+  };
+
+  const handleUpdateCartQuantity = async (id, quantity) => {
+    const { cart } = await commerce.cart.update(id, { quantity });
+    setCart(cart);
+  };
+
+  const handleRemoveFromCart = async (id) => {
+    const { cart } = await commerce.cart.remove(id);
+    setCart(cart);
+  };
+
+  const handleEmptyCart = async () => {
+    const { cart } = await commerce.cart.empty();
+    setCart(cart);
+  };
+  useEffect(() => {
+    fetchProducts();
+    fetchCart();
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div>
+        <Navbar cart={cart} />
+        <Switch>
+          <Route exact path='/'>
+            <Products products={products} handleAddToCart={handleAddToCart} />
+          </Route>
+          <Route path='/cart'>
+            <Cart
+              cart={cart}
+              handleRemoveFromCart={handleRemoveFromCart}
+              handleUpdateCartQuantity={handleUpdateCartQuantity}
+              handleEmptyCart={handleEmptyCart}
+            />
+          </Route>
+          <Route path='/checkout'>
+            <Checkout cart={cart} />
+          </Route>
+        </Switch>
+      </div>
+    </Router>
   );
-}
+};
 
 export default App;
