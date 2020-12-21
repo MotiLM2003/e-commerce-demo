@@ -20,6 +20,7 @@ import Confirmation from './Confirmation';
 const steps = ['Shipping address', 'Payment details'];
 
 const Checkout = ({ cart }) => {
+  const temp;
   const classes = useStyles();
   const [activeStep, setActiveStep] = useState(0);
   const [checkoutToken, setCheckoutToken] = useState(null);
